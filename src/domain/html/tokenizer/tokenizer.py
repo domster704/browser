@@ -1,9 +1,9 @@
 from dataclasses import replace
 from enum import Enum, auto
 
-from src.domain.entities.html_document import HTMLDocument
-from src.domain.html.character_reference import CHARACTER_REFERENCE
-from src.domain.html.tokens import (
+from src.domain.html.document import HTMLDocument
+from src.domain.html.tokenizer.character_reference import CHARACTER_REFERENCE
+from src.domain.html.tokenizer.tokens import (
     BaseToken,
     CharacterToken,
     StartTagToken,

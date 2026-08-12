@@ -1,8 +1,10 @@
 from pprint import pprint
 
 from src.application.service.page_loader import PageLoader
-from src.domain.entities.html_document import HTMLDocument
-from src.domain.html.tokenizer import HTMLTokenizer
+from src.domain.html.document import HTMLDocument
+from src.domain.html.dom.element_factory import HTMLElementFactory
+from src.domain.html.dom.tree_builder import HTMLTreeBuilder
+from src.domain.html.tokenizer.tokenizer import HTMLTokenizer
 from src.domain.value_objects.uri import URI
 from src.infrastructure.adapters.data_resource_loader import DataResourceLoader
 from src.infrastructure.adapters.file_resource_loader import FileResourceLoader
@@ -25,6 +27,9 @@ uri = URI.parse("file:///E:/ITSoft/Programming/vscode/index.html")
 
 resource = page_loader.load(uri)
 html = HTMLDocument(source=resource.decode())
-
 html_tokenizer = HTMLTokenizer(document=html)
-pprint(html_tokenizer.tokenize())
+
+tokens = html_tokenizer.tokenize()
+
+html_builder = HTMLTreeBuilder(element_factory=HTMLElementFactory())
+pprint(html_builder.parse(tokens))
