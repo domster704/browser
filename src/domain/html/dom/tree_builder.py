@@ -7,16 +7,33 @@ from src.domain.html.tokenizer.tokens import (
     StartTagToken,
     EndTagToken,
     CharacterToken,
+    CommentToken,
 )
 
 type DOMType = DocumentNode | ElementNode
 type StackDOMType = list[DOMType]
 
+VOID_ELEMENTS = {
+    "area",
+    "base",
+    "br",
+    "col",
+    "embed",
+    "hr",
+    "img",
+    "input",
+    "link",
+    "meta",
+    "source",
+    "track",
+    "wbr",
+}
+
 
 class HTMLTreeBuilder:
     def __init__(
-        self,
-        element_factory: HTMLElementFactory,
+            self,
+            element_factory: HTMLElementFactory,
     ):
         self._element_factory = element_factory
 
@@ -34,13 +51,13 @@ class HTMLTreeBuilder:
                 )
                 current_node.children.append(element)
 
-                if not token.self_closing:
+                if not token.self_closing and token.name not in VOID_ELEMENTS:
                     stack.append(element)
             elif isinstance(token, EndTagToken):
                 self.__close_element(stack, token)
             elif isinstance(token, CharacterToken):
                 self.__append_text(current_node, token.data)
-            elif isinstance(token, CommentNode):
+            elif isinstance(token, CommentToken):
                 current_node.children.append(CommentNode(token.data))
 
         return document
