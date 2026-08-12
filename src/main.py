@@ -1,6 +1,7 @@
 from pprint import pprint
 
 from src.application.service.page_loader import PageLoader
+from src.application.service.view_source_resource_loader import ViewSourceResourceLoader
 from src.domain.html.document import HTMLDocument
 from src.domain.html.dom.element_factory import HTMLElementFactory
 from src.domain.html.dom.tree_builder import HTMLTreeBuilder
@@ -21,15 +22,20 @@ page_loader = PageLoader(
         "data": DataResourceLoader(),
     }
 )
+page_loader.register("view-source", ViewSourceResourceLoader(page_loader))
 
+# uri = URI.parse("view-source:file:///E:/ITSoft/Programming/vscode/index.html")
 uri = URI.parse("file:///E:/ITSoft/Programming/vscode/index.html")
 # uri = URI.parse("data:text/plain;base64," "SGVsbG8sIFdvcmxkIQ%3D%3D")
 
 resource = page_loader.load(uri)
-html = HTMLDocument(source=resource.decode())
-html_tokenizer = HTMLTokenizer(document=html)
+if uri.scheme == "view-source":
+    print(resource.decode())
+else:
+    html = HTMLDocument(source=resource.decode())
+    html_tokenizer = HTMLTokenizer(document=html)
 
-tokens = html_tokenizer.tokenize()
+    tokens = html_tokenizer.tokenize()
 
-html_builder = HTMLTreeBuilder(element_factory=HTMLElementFactory())
-pprint(html_builder.parse(tokens))
+    html_builder = HTMLTreeBuilder(element_factory=HTMLElementFactory())
+    pprint(html_builder.parse(tokens))

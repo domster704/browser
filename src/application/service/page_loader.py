@@ -3,11 +3,11 @@ from src.domain.value_objects.uri import URI
 
 
 class PageLoader:
-    def __init__(
-        self,
-        loaders: dict[str, ResourceLoader],
-    ):
+    def __init__(self, loaders: dict[str, ResourceLoader]):
         self._loaders = loaders
+
+    def register(self, scheme: str, loader: ResourceLoader):
+        self._loaders[scheme] = loader
 
     def load(self, uri: URI):
         try:

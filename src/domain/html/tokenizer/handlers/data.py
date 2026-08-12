@@ -1,4 +1,4 @@
-from src.domain.html.tokenizer.characters import CHARACTER_REFERENCE
+from src.domain.html.tokenizer.character_references import CHARACTER_REFERENCE
 from src.domain.html.tokenizer.context import TokenizerContext
 from src.domain.html.tokenizer.state import TokenizerState
 from src.domain.html.tokenizer.tokens import CharacterToken
