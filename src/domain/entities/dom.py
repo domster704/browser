@@ -1,0 +1,3 @@
+class DOM:
+    def __init__(self):
+        ...
