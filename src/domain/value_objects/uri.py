@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from urllib.parse import urlsplit, SplitResult
+from urllib.parse import SplitResult, urlsplit
 
 
 @dataclass(frozen=True, slots=True)

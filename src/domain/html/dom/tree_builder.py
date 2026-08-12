@@ -1,13 +1,20 @@
-from typing import Iterable
+from collections.abc import Iterable
 
 from src.domain.html.dom.element_factory import HTMLElementFactory
-from src.domain.html.dom.nodes import DocumentNode, ElementNode, CommentNode, TextNode
+from src.domain.html.dom.nodes import (
+    CommentNode,
+    DocumentNode,
+    DocumentTypeNode,
+    ElementNode,
+    TextNode,
+)
 from src.domain.html.tokenizer.tokens import (
     BaseToken,
-    StartTagToken,
-    EndTagToken,
     CharacterToken,
     CommentToken,
+    DOCTYPEToken,
+    EndTagToken,
+    StartTagToken,
 )
 
 type DOMType = DocumentNode | ElementNode
@@ -32,8 +39,8 @@ VOID_ELEMENTS = {
 
 class HTMLTreeBuilder:
     def __init__(
-            self,
-            element_factory: HTMLElementFactory,
+        self,
+        element_factory: HTMLElementFactory,
     ):
         self._element_factory = element_factory
 
@@ -57,6 +64,14 @@ class HTMLTreeBuilder:
                 self.__close_element(stack, token)
             elif isinstance(token, CharacterToken):
                 self.__append_text(current_node, token.data)
+            elif isinstance(token, DOCTYPEToken):
+                document.children.append(
+                    DocumentTypeNode(
+                        name=token.name or "",
+                        public_identifier=token.public_identifier,
+                        system_identifier=token.system_identifier,
+                    )
+                )
             elif isinstance(token, CommentToken):
                 current_node.children.append(CommentNode(token.data))
 

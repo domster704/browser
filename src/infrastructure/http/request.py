@@ -24,8 +24,6 @@ class HTTPRequest:
 
     def to_bytes(self) -> bytes:
         request = f"GET {self.uri.path} HTTP/1.0\r\n"
-        request += f"\r\n".join(
-            f"{key}: {value}" for key, value in self.headers.items()
-        )
+        request += "\r\n".join(f"{key}: {value}" for key, value in self.headers.items())
         request += "\r\n\r\n"
         return request.encode("utf-8") + self.body

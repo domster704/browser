@@ -3,8 +3,8 @@ from pathlib import Path
 from urllib.request import url2pathname
 
 from src.application.ports.page_loader import ResourceLoader
-from src.domain.value_objects.uri import URI
 from src.domain.entities.resource import Resource
+from src.domain.value_objects.uri import URI
 
 
 class FileResourceLoader(ResourceLoader):

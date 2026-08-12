@@ -1,7 +1,7 @@
 from typing import Protocol
 
-from src.domain.value_objects.uri import URI
 from src.domain.entities.resource import Resource
+from src.domain.value_objects.uri import URI
 
 
 class ResourceLoader(Protocol):

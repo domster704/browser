@@ -6,6 +6,13 @@ class Node:
 
 
 @dataclass
+class DocumentTypeNode(Node):
+    name: str
+    public_identifier: str | None = None
+    system_identifier: str | None = None
+
+
+@dataclass
 class DocumentNode(Node):
     children: list[Node] = field(default_factory=list)
 
