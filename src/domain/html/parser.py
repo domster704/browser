@@ -1,3 +1,0 @@
-class HTMLParser:
-    def parse(self, html):
-        ...
