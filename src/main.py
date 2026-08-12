@@ -1,5 +1,6 @@
 from src.application.service.page_loader import PageLoader
 from src.domain.value_objects.uri import URI
+from src.infrastructure.adapters.data_resource_loader import DataResourceLoader
 from src.infrastructure.adapters.file_resource_loader import FileResourceLoader
 from src.infrastructure.adapters.http_resource_loader import HTTPResourceLoader
 from src.infrastructure.http.socket_client import SocketHTTPClient
@@ -11,13 +12,16 @@ page_loader = PageLoader(
         "http": HTTPResourceLoader(http_client),
         "https": HTTPResourceLoader(http_client),
         "file": FileResourceLoader(),
+        "data": DataResourceLoader(),
     }
 )
 
+# uri = URI.parse("file:///E:/ITSoft/Programming/vscode/index.html")
 uri = URI.parse(
-    "file:///E:/ITSoft/Programming/vscode/index.html"
+    "data:text/plain;base64,"
+    "SGVsbG8sIFdvcmxkIQ%3D%3D"
 )
 
 content = page_loader.load(uri)
 
-print(content.decode("utf-8"))
+print(content.body.decode(content.charset))

@@ -2,6 +2,7 @@ from src.application.ports.http_client import HTTPClient
 from src.application.ports.page_loader import ResourceLoader
 from src.domain.value_objects.uri import URI
 from src.infrastructure.http.request import HTTPRequest
+from src.domain.entities.resource import Resource
 from src.infrastructure.http.response import HTTPResponse
 
 
@@ -12,7 +13,7 @@ class HTTPResourceLoader(ResourceLoader):
     ):
         self.client = client
 
-    def load(self, uri: URI) -> bytes:
+    def load(self, uri: URI) -> Resource:
         request = HTTPRequest(uri)
 
         request.add_headers(
@@ -25,4 +26,8 @@ class HTTPResourceLoader(ResourceLoader):
 
         response: HTTPResponse = self.client.send(request)
 
-        return response.body
+        return Resource(
+            body=response.body,
+            mime_type=response.mime_type,
+            charset=response.charset,
+        )
