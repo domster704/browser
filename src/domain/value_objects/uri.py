@@ -16,15 +16,16 @@ class URI:
     @classmethod
     def parse(cls, raw: str) -> URI:
         result: SplitResult = urlsplit(raw)
-
         if not result.scheme:
             raise ValueError("URI must contain scheme")
+
+        path = result.path or "/"
 
         return cls(
             scheme=result.scheme.casefold(),
             host=result.hostname,
             port=result.port,
-            path=result.path,
+            path=path,
             query=result.query or None,
             fragment=result.fragment or None,
         )

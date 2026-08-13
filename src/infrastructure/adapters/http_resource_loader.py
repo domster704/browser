@@ -19,7 +19,7 @@ class HTTPResourceLoader(ResourceLoader):
         request.add_headers(
             headers={
                 "Host": uri.host,
-                "Connection": "close",
+                "Connection": "keep-alive",
                 "User-Agent": "Test",
             }
         )
