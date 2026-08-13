@@ -14,7 +14,6 @@ class HTMLTokenizer:
     def tokenize(self) -> list[BaseToken]:
         while not self._ctx.eof:
             handler: StateHandler = STATE_HANDLERS[self._ctx.state]
-
             handler(self._ctx, self._ctx.current_char)
 
         return self._ctx.tokens

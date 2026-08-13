@@ -3,6 +3,8 @@ from enum import Enum, auto
 
 class TokenizerState(Enum):
     DATA = auto()
+    SCRIPT_DATA = auto()
+
     TAG_OPEN = auto()
     TAG_NAME = auto()
     END_TAG_OPEN = auto()

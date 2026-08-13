@@ -71,6 +71,9 @@ def handle_self_closing_start_tag(ctx: TokenizerContext, char: str):
     if char != ">":
         raise NotImplementedError("Attributes after '/' are not supported yet")
 
+    if not isinstance(ctx.current_token, StartTagToken):
+        raise TypeError("Expected StartTagToken")
+
     ctx.current_token = replace(
         ctx.current_token,
         self_closing=True,

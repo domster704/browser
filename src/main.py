@@ -25,8 +25,8 @@ page_loader = PageLoader(
 page_loader.register("view-source", ViewSourceResourceLoader(page_loader))
 
 # uri = URI.parse("view-source:file:///E:/ITSoft/Programming/vscode/index.html")
-# uri = URI.parse("file:///E:/ITSoft/Programming/vscode/index.html")
-uri = URI.parse("https://example.com")
+uri = URI.parse("file:///E:/ITSoft/Programming/vscode/index.html")
+# uri = URI.parse("https://www.google.com/")
 # uri = URI.parse("data:text/plain;base64," "SGVsbG8sIFdvcmxkIQ%3D%3D")
 
 resource = page_loader.load(uri)
@@ -39,4 +39,4 @@ else:
     tokens = html_tokenizer.tokenize()
 
     html_builder = HTMLTreeBuilder(element_factory=HTMLElementFactory())
-    pprint(html_builder.parse(tokens))
+    pprint(html_builder.parse(tokens), width=200)

@@ -29,6 +29,7 @@ from src.domain.html.tokenizer.handlers.doctype import (
     handle_doctype_name,
 )
 from src.domain.html.tokenizer.handlers.markup import handle_markup_declaration_open
+from src.domain.html.tokenizer.handlers.script import handel_script_data
 from src.domain.html.tokenizer.handlers.tag import (
     handle_end_tag_open,
     handle_self_closing_start_tag,
@@ -47,6 +48,7 @@ STATE_HANDLERS: dict[
     StateHandler,
 ] = {
     TokenizerState.DATA: handle_data,
+    TokenizerState.SCRIPT_DATA: handel_script_data,
     TokenizerState.TAG_OPEN: handle_tag_open,
     TokenizerState.TAG_NAME: handle_tag_name,
     TokenizerState.END_TAG_OPEN: handle_end_tag_open,

@@ -1,7 +1,7 @@
 from src.domain.html.tokenizer.character_references import CHARACTER_REFERENCE
 from src.domain.html.tokenizer.context import TokenizerContext
 from src.domain.html.tokenizer.state import TokenizerState
-from src.domain.html.tokenizer.tokens import CharacterToken
+from src.domain.html.tokenizer.tokens import CharacterToken, StartTagToken, BaseToken
 
 
 def handle_data(ctx: TokenizerContext, char: str):
@@ -36,5 +36,11 @@ def handle_character_reference(ctx: TokenizerContext, char: str):
 
 
 def emit_and_consume_in_data(ctx: TokenizerContext):
+    token: BaseToken | None = ctx.current_token
     ctx.emit_current_token()
+
+    if isinstance(token, StartTagToken) and token.name == "script":
+        ctx.consume_in(TokenizerState.SCRIPT_DATA)
+        return
+
     ctx.consume_in(TokenizerState.DATA)

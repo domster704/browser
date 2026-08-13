@@ -38,12 +38,12 @@ class SocketHTTPClient(HTTPClient):
 
         try:
             connection.socket.sendall(request.to_bytes())
-            response, connection_header = self.__parse_response(connection.reader)
+            response, reusable = self.__parse_response(connection.reader)
         except (OSError, EOFError):
             self.__close_connection(key)
             raise
 
-        if connection_header == "close":
+        if not reusable:
             self.__close_connection(key)
 
         return response
@@ -70,32 +70,43 @@ class SocketHTTPClient(HTTPClient):
             header, value = decoded.split(":", 1)
             response_headers[header.casefold()] = value.strip()
 
-        assert "transfer-encoding" not in response_headers
-        assert "content-encoding" not in response_headers
+        if "transfer-encoding" in response_headers:
+            raise NotImplementedError("Transfer-Encoding is not supported yet")
+        if "content-encoding" in response_headers:
+            raise NotImplementedError("Content-Encoding is not supported yet")
 
         content_length_header = response_headers.get("content-length", None)
         connection_header: str = response_headers.get("connection", "").casefold()
+        reusable = False
 
         if content_length_header is not None:
             content_length = int(content_length_header)
             body: bytes = response.read(content_length)
-
             if len(body) != content_length:
                 raise EOFError(
                     f"Expected {content_length} bytes, got {len(body)} bytes"
                 )
-        elif connection_header == "close":
-            body = response.read()
-        else:
-            raise ValueError("Cannot determine response body length")
 
-        return HTTPResponse(
-            version=version,
-            status=int(status),
-            reason=reason,
-            headers=response_headers,
-            body=body,
-        ), connection_header
+            if version == "HTTP/1.0":
+                # В протоколе HTTP/1.0, если заголовок Content-Length отсутствует, конец передачи данных
+                # определяется моментом разрыва TCP-соединения сервером. Клиент читает поток до тех пор,
+                # пока сокет не вернет признак конца файла
+                reusable = connection_header == "keep-alive"
+            else:
+                reusable = connection_header != "close"
+        else:
+            body = response.read()
+
+        return (
+            HTTPResponse(
+                version=version,
+                status=int(status),
+                reason=reason,
+                headers=response_headers,
+                body=body,
+            ),
+            reusable,
+        )
 
     def __create_connection(self, host: str, port: int, scheme: str) -> Connection:
         sock: socket.socket = socket.socket(
@@ -128,5 +139,5 @@ class SocketHTTPClient(HTTPClient):
             connection.socket.close()
 
     def close(self) -> None:
-        for key in self._connections:
+        for key in list(self._connections):
             self.__close_connection(key)
