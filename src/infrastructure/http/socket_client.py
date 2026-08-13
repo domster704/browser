@@ -3,7 +3,6 @@ import ssl
 from dataclasses import dataclass
 from io import BufferedReader
 
-from src.domain.value_objects.uri import URI
 from src.infrastructure.http.client import HTTPClient
 from src.infrastructure.http.request import HTTPRequest
 from src.infrastructure.http.response import HTTPResponse

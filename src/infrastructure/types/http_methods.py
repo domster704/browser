@@ -2,7 +2,7 @@ from enum import StrEnum
 
 
 class HTTPMethods(StrEnum):
-    GET = ("GET",)
+    GET = "GET"
     POST = "POST"
     PUT = "PUT"
     DELETE = "DELETE"

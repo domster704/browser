@@ -29,7 +29,4 @@ class HTTPRequest:
         return request.encode("utf-8") + self.body
 
     def __repr__(self):
-        return (
-            f"{self.uri} == "
-            f"{self.to_bytes().decode("utf-8").replace("\r\n", " | ")}"
-        )
+        return f"{self.uri} == {self.to_bytes().decode('utf-8').replace('\r\n', ' | ')}"
