@@ -1,3 +1,4 @@
+import gzip
 import socket
 import ssl
 from dataclasses import dataclass
@@ -101,16 +102,23 @@ class SocketHTTPClient(HTTPClient):
             header, value = decoded.split(":", 1)
             response_headers[header.casefold()] = value.strip()
 
-        if "transfer-encoding" in response_headers:
-            raise NotImplementedError("Transfer-Encoding is not supported yet")
-        if "content-encoding" in response_headers:
-            raise NotImplementedError("Content-Encoding is not supported yet")
-
         content_length_header = response_headers.get("content-length", None)
         connection_header: str = response_headers.get("connection", "").casefold()
         reusable = False
 
-        if content_length_header is not None:
+        transfer_encoding = response_headers.get("transfer-encoding")
+        content_encoding = response_headers.get("content-encoding")
+
+        if transfer_encoding:
+            encodings = [
+                encoding.strip().casefold() for encoding in transfer_encoding.split(",")
+            ]
+            if encodings[-1] != "chunked":
+                raise NotImplementedError(
+                    f"Unsupported Transfer-Encoding: {transfer_encoding}"
+                )
+            body = self.__read_chunked_body(response)
+        elif content_length_header is not None:
             content_length = int(content_length_header)
             body: bytes = response.read(content_length)
             if len(body) != content_length:
@@ -127,6 +135,13 @@ class SocketHTTPClient(HTTPClient):
                 reusable = connection_header != "close"
         else:
             body = response.read()
+
+        if content_encoding:
+            encoding = content_encoding.casefold()
+            if encoding == "gzip":
+                body = gzip.decompress(body)
+            else:
+                raise NotImplementedError(f"Unknown Content-Encoding: {encoding!r}")
 
         return (
             HTTPResponse(
@@ -169,6 +184,40 @@ class SocketHTTPClient(HTTPClient):
         finally:
             connection.socket.close()
 
-    def close(self) -> None:
-        for key in list(self._connections):
-            self.__close_connection(key)
+    def __read_chunked_body(self, reader: BufferedReader) -> bytes:
+        body = bytearray()
+
+        while True:
+            size_line: bytes = reader.readline()
+            if not size_line:
+                raise EOFError("Server closed connection while reading chunk size")
+            size_line = size_line.rstrip(b"\r\n")
+
+            size_text = size_line.split(b";", 1)[0]
+            try:
+                chunk_size = int(size_text, 16)
+            except ValueError as e:
+                raise ValueError(f"Invalid chunk size: {size_text}") from e
+
+            if chunk_size == 0:
+                self.__read_trailers(reader)
+                break
+
+            chunk = reader.read(chunk_size)
+            if len(chunk) != chunk_size:
+                raise EOFError(f"Expected {chunk_size} bytes, got {len(chunk)}")
+
+            body.extend(chunk)
+            ending = reader.read(2)  # \r\n
+            if ending != b"\r\n":
+                raise ValueError(f"Invalid chunk ending: {ending!r}")
+
+        return bytes(body)
+
+    def __read_trailers(self, reader: BufferedReader) -> None:
+        while True:
+            line = reader.readline()
+            if not line:
+                raise EOFError("Server closed connection while reading trailers")
+            if line == b"\r\n":
+                return

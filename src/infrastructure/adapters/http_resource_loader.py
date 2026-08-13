@@ -33,7 +33,8 @@ class HTTPResourceLoader(ResourceLoader):
             {
                 "Host": uri.host,
                 "Connection": "keep-alive",
-                "User-Agent": "Test",
+                "User-Agent": "Test Browser",
+                "Accept-Encoding": "gzip",
             }
         )
         response: HTTPResponse = self.client.send(request)
