@@ -3,6 +3,7 @@ import ssl
 from dataclasses import dataclass
 from io import BufferedReader
 
+from src.domain.value_objects.uri import URI
 from src.infrastructure.http.client import HTTPClient
 from src.infrastructure.http.request import HTTPRequest
 from src.infrastructure.http.response import HTTPResponse
@@ -18,10 +19,27 @@ ConnectionKey = tuple[str, str, int]  # (scheme, host, port)
 
 
 class SocketHTTPClient(HTTPClient):
+    MAX_REDIRECTS = 4
+
     def __init__(self):
         self._connections: dict[ConnectionKey, Connection] = {}
 
     def send(self, request: HTTPRequest) -> HTTPResponse:
+        for _ in range(self.MAX_REDIRECTS):
+            response = self.__send_once(request)
+            if response.status not in {301, 302, 303, 307, 308}:
+                return response
+
+            location = response.headers.get("location")
+            if not location:
+                raise response
+
+            request = self.__create_redirect_request(request, location)
+            print(request)
+
+        raise RuntimeError("Too many redirects")
+
+    def __send_once(self, request: HTTPRequest) -> HTTPResponse:
         uri = request.uri
         if uri.scheme not in {"http", "https"}:
             raise ValueError(f"Unsupported scheme: {uri.scheme}")
@@ -47,6 +65,20 @@ class SocketHTTPClient(HTTPClient):
             self.__close_connection(key)
 
         return response
+
+    def __create_redirect_request(
+        self, request: HTTPRequest, location: str
+    ) -> HTTPRequest:
+        redirect_uri = request.uri.resolve(location)
+
+        headers = request.headers.copy()
+        headers["Host"] = redirect_uri.host
+
+        new_request = HTTPRequest(method=request.method, uri=redirect_uri)
+        new_request.add_headers(headers)
+        new_request.set_body(request.body)
+
+        return new_request
 
     def __parse_response(self, response: BufferedReader) -> tuple[HTTPResponse, str]:
         status_line_bytes: bytes = response.readline()

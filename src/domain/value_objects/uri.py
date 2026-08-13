@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from urllib.parse import SplitResult, urlsplit
 
 
@@ -29,3 +29,9 @@ class URI:
             query=result.query or None,
             fragment=result.fragment or None,
         )
+
+    def resolve(self, url: str) -> URI:
+        if url.startswith("/"):
+            return replace(self, path=url)
+
+        return URI.parse(url)

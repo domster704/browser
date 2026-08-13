@@ -16,10 +16,10 @@ class HTTPRequest:
     def add_header(self, key: str, value: str):
         self.headers[key] = value
 
-    def add_headers(self, headers: dict[str, str]):
+    def add_headers(self, headers: dict[str, str], /):
         self.headers |= headers
 
-    def set_body(self, body: bytes):
+    def set_body(self, body: bytes, /):
         self.body = body
 
     def to_bytes(self) -> bytes:
@@ -27,3 +27,9 @@ class HTTPRequest:
         request += "\r\n".join(f"{key}: {value}" for key, value in self.headers.items())
         request += "\r\n\r\n"
         return request.encode("utf-8") + self.body
+
+    def __repr__(self):
+        return (
+            f"{self.uri} == "
+            f"{self.to_bytes().decode("utf-8").replace("\r\n", " | ")}"
+        )
