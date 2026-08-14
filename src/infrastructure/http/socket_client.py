@@ -35,7 +35,6 @@ class SocketHTTPClient(HTTPClient):
                 raise response
 
             request = self.__create_redirect_request(request, location)
-            print(request)
 
         raise RuntimeError("Too many redirects")
 
